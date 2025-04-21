@@ -1,11 +1,24 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import Layout from "../layouts/Layout.astro";
+import ToolBar from "../components/ToolBar.svelte";
+import Canvas from "../components/Canvas.svelte";
+import Navigation from "../components/Navigation.svelte";
 ---
 
-<Layout>
-	<Welcome />
+<Layout title="Editor de Grafos">
+  <div class="app-container">
+    <ToolBar client:load />
+    <Navigation client:load />
+    <Canvas client:load />
+  </div>
 </Layout>
+
+<style>
+  .app-container {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+</style>
