@@ -52,19 +52,21 @@
     stroke-linecap="round"
     on:click={handleClick}
     pointer-events={pathPointerEvents}
-  >
-  </path>
+    marker-end={source && target ? `url(#arrowhead-${id})` : ""}
+  />
   {#if source && target}
-    <marker
-      id="arrowhead-{id}"
-      markerWidth="10"
-      markerHeight="7"
-      refX="9"
-      refY="3.5"
-      orient="auto"
-    >
-      <polygon points="0 0, 10 3.5, 0 7" fill="#666" />
-    </marker>
+    <defs>
+      <marker
+        id="arrowhead-{id}"
+        markerWidth="10"
+        markerHeight="7"
+        refX="9"
+        refY="3.5"
+        orient="auto"
+      >
+        <polygon points="0 0, 10 3.5, 0 7" fill="#666" />
+      </marker>
+    </defs>
   {/if}
 </svg>
 
@@ -77,6 +79,7 @@
     height: 100%;
     pointer-events: none;
     z-index: 5;
+    overflow: visible;
   }
 
   path {

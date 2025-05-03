@@ -1,7 +1,13 @@
 <script>
   import { graphStore } from "../lib/graphStore.js";
+  import { cycleStore } from "../lib/cycleStore.js";
 
   let showOptions = false;
+  let eulerianCycle = null;
+
+  const unsubscribeCycle = cycleStore.subscribe((state) => {
+    eulerianCycle = state.eulerianCycle;
+  });
 
   function toggleOptions() {
     showOptions = !showOptions;
@@ -38,40 +44,56 @@
     graphStore.executeGraph();
     showOptions = false;
   }
+
+  function stopCycleDisplay() {
+    cycleStore.reset();
+    graphStore.setMode("pan");
+  }
+
+  import { onDestroy } from "svelte";
+  onDestroy(() => {
+    if (unsubscribeCycle) unsubscribeCycle();
+  });
 </script>
 
 <div class="toolbar">
-  <button class="main-button" on:click={toggleOptions}>
-    <span class="plus-icon">+</span>
-  </button>
+  {#if eulerianCycle}
+    <button class="main-button" on:click={stopCycleDisplay}>
+      <span class="pause-icon">◼︎</span>
+    </button>
+  {:else}
+    <button class="main-button" on:click={toggleOptions}>
+      <span class="plus-icon">+</span>
+    </button>
 
-  {#if showOptions}
-    <div class="options">
-      <button on:click={createNode}>
-        <span class="icon">📍</span>
-        <span>Crear Nodo</span>
-      </button>
-      <button on:click={editNode}>
-        <span class="icon">✒️</span>
-        <span>Editar Nodo</span>
-      </button>
-      <button on:click={deleteNode}>
-        <span class="icon">🗑️</span>
-        <span>Eliminar Nodo</span>
-      </button>
-      <button on:click={startConnecting}>
-        <span class="icon">🙌</span>
-        <span>Enlazar</span>
-      </button>
-      <button on:click={deleteConnection}>
-        <span class="icon">✂️</span>
-        <span>Desenlazar</span>
-      </button>
-      <button on:click={executeGraph}>
-        <span class="icon">🎉</span>
-        <span>Ejecutar</span>
-      </button>
-    </div>
+    {#if showOptions}
+      <div class="options">
+        <button on:click={createNode}>
+          <span class="icon">📍</span>
+          <span>Crear Nodo</span>
+        </button>
+        <button on:click={editNode}>
+          <span class="icon">✒️</span>
+          <span>Editar Nodo</span>
+        </button>
+        <button on:click={deleteNode}>
+          <span class="icon">🗑️</span>
+          <span>Eliminar Nodo</span>
+        </button>
+        <button on:click={startConnecting}>
+          <span class="icon">🙌</span>
+          <span>Enlazar</span>
+        </button>
+        <button on:click={deleteConnection}>
+          <span class="icon">✂️</span>
+          <span>Desenlazar</span>
+        </button>
+        <button on:click={executeGraph}>
+          <span class="icon">🎉</span>
+          <span>Ejecutar</span>
+        </button>
+      </div>
+    {/if}
   {/if}
 </div>
 
@@ -100,6 +122,11 @@
 
   .plus-icon {
     font-size: 32px;
+    line-height: 1;
+  }
+
+  .pause-icon {
+    font-size: 24px;
     line-height: 1;
   }
 

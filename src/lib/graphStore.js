@@ -1,4 +1,5 @@
 import { writable } from "svelte/store";
+import { cycleStore } from "./cycleStore";
 
 function createGraphStore() {
   const initialState = {
@@ -331,35 +332,9 @@ function createGraphStore() {
 
     executeGraph: () => {
       update((state) => {
-        const connectionMap = {};
-        state.nodes.forEach((node) => {
-          connectionMap[node.label] = [];
-        });
-        state.edges.forEach((edge) => {
-          const sourceNode = state.nodes.find((n) => n.id === edge.sourceId);
-          const targetNode = state.nodes.find((n) => n.id === edge.targetId);
-
-          if (sourceNode && targetNode) {
-            connectionMap[sourceNode.label].push(targetNode.label);
-            connectionMap[targetNode.label].push(sourceNode.label);
-          }
-        });
-
-        let summary = "Conexiones del grafo:\n";
-        Object.entries(connectionMap).forEach(([nodeLabel, connections]) => {
-          const uniqueConnections = [...new Set(connections)].sort();
-          console.log(
-            `${nodeLabel} está conectado con: ${
-              uniqueConnections.join(", ") || "ningún nodo"
-            }`
-          );
-          summary += `${nodeLabel} está conectado con: ${
-            uniqueConnections.join(", ") || "ningún nodo"
-          }\n`;
-        });
-
-        alert(summary);
-
+        console.log(state.nodes);
+        console.log(state.edges);
+        cycleStore.analyzeCycle(state.nodes, state.edges);
         return state;
       });
     },

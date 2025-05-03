@@ -1,8 +1,10 @@
 <script>
   import { onMount } from "svelte";
   import { graphStore } from "../lib/graphStore.js";
+  import { cycleStore } from "../lib/cycleStore.js";
   import GraphNode from "./GraphNode.svelte";
   import GraphEdge from "./GraphEdge.svelte";
+  import GraphCycle from "./GraphCycle.svelte";
 
   let canvasContainer;
   let svgLayer;
@@ -17,12 +19,17 @@
   let edges = [];
   let mode = "default";
   let selectedNode = null;
+  let eulerianCycle = null;
 
-  const unsubscribe = graphStore.subscribe((state) => {
+  const unsubscribeGraph = graphStore.subscribe((state) => {
     nodes = state.nodes;
     edges = state.edges;
     mode = state.mode;
     selectedNode = state.selectedNode;
+  });
+
+  const unsubscribeCycle = cycleStore.subscribe((state) => {
+    eulerianCycle = state.eulerianCycle;
   });
 
   $: transformStyle = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
@@ -143,8 +150,14 @@
 
   onMount(() => {
     canvasElement = document.createElement("canvas");
+    canvasElement.className = "grid-canvas";
     canvasElement.width = canvasContainer.clientWidth;
     canvasElement.height = canvasContainer.clientHeight;
+    canvasElement.style.position = "absolute";
+    canvasElement.style.top = "0";
+    canvasElement.style.left = "0";
+    canvasElement.style.zIndex = "0";
+    canvasElement.style.pointerEvents = "none";
     canvasContext = canvasElement.getContext("2d");
 
     canvasContainer.insertBefore(canvasElement, canvasContainer.firstChild);
@@ -167,7 +180,8 @@
     return () => {
       canvasContainer.removeEventListener("wheel", handleWheel);
       resizeObserver.disconnect();
-      unsubscribe();
+      unsubscribeGraph();
+      unsubscribeCycle();
     };
   });
 </script>
@@ -196,6 +210,19 @@
     {#each edges as edge (edge.id)}
       <GraphEdge {...edge} {nodes} {mode} />
     {/each}
+
+    {#if eulerianCycle}
+      {#each edges as edge (edge.id)}
+        <GraphCycle
+          id={edge.id}
+          sourceId={edge.sourceId}
+          targetId={edge.targetId}
+          controlPoints={edge.controlPoints || []}
+          {nodes}
+          {eulerianCycle}
+        />
+      {/each}
+    {/if}
 
     {#each nodes as node (node.id)}
       <GraphNode
@@ -227,5 +254,6 @@
     transform-origin: center;
     pointer-events: all;
     z-index: 1;
+    overflow: visible;
   }
 </style>
